@@ -7,14 +7,16 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class CityDto {
+public class GeoNameDto {
     private int geonameId;
-    private String toponymName;
     private String name;
+    private String toponymName;
     private long countryId;
     private String countryCode;
     private String countryName;
     private long population;
     private String fcodeName;
     private String adminName1;
+    private double lng;
+    private double lat;
 }

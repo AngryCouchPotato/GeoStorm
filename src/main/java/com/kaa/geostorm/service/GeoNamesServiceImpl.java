@@ -2,7 +2,7 @@ package com.kaa.geostorm.service;
 
 import com.kaa.geostorm.domain.GeoName;
 import com.kaa.geostorm.domain.GeoNames;
-import com.kaa.geostorm.dto.CityDto;
+import com.kaa.geostorm.dto.GeoNameDto;
 import com.kaa.geostorm.dto.mapper.Mapper;
 import com.kaa.geostorm.properties.GeoNamesProperties;
 import lombok.AllArgsConstructor;
@@ -28,34 +28,28 @@ public class GeoNamesServiceImpl implements GeoNamesService {
 
     private RestTemplate restTemplate;
 
-    private Mapper<GeoName, CityDto> mapper;
+    private Mapper<GeoName, GeoNameDto> mapper;
 
     @Override
-    public List<CityDto> find(String name, int maxRows, int startRow) {
-        List<CityDto> cities = mapper.map(
+    public List<GeoNameDto> find(String name) {
+        List<GeoNameDto> geonames = mapper.map(
                 restTemplate.exchange(//todo add catch clause
-                        buildUri(name, maxRows, startRow),
+                        buildUri(name),
                         HttpMethod.GET,
                         null,
                         new ParameterizedTypeReference<GeoNames>() {
                         })
                         .getBody().getGeonames()
         );
-        logger.debug(String.format("For name = %s was founded %d cities", name, cities.size()));
-        return cities;
+        logger.debug(String.format("For name = %s were founded %d geonames", name, geonames.size()));
+        return geonames;
     }
 
-    private URI buildUri(String name, int maxRows, int startRow) {
+    private URI buildUri(String name) {
         UriComponentsBuilder uriComponentBuilder = UriComponentsBuilder
                 .fromUriString(geoNamesProperties.getSearchUrl());
         if (!StringUtils.isEmpty(name)) {
             uriComponentBuilder.queryParam("name", name);
-        }
-        if (maxRows > 0) {
-            uriComponentBuilder.queryParam("maxRows", Integer.toString(maxRows));
-        }
-        if (startRow > 0) {
-            uriComponentBuilder.queryParam("startRow", Integer.toString(startRow));
         }
         uriComponentBuilder.queryParam("userName", geoNamesProperties.getUserName());
         uriComponentBuilder.queryParam("type", "json");

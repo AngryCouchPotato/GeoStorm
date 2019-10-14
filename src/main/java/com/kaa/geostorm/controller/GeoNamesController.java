@@ -1,6 +1,6 @@
 package com.kaa.geostorm.controller;
 
-import com.kaa.geostorm.dto.CityDto;
+import com.kaa.geostorm.dto.GeoNameDto;
 import com.kaa.geostorm.service.GeoNamesService;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -8,15 +8,16 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/cities")
+@CrossOrigin("http://localhost:3000")
+@RequestMapping("/geonames")
 @AllArgsConstructor
 public class GeoNamesController {
 
     private GeoNamesService geoNamesService;
 
-    @GetMapping("/{name}")
-    public List<CityDto> find(@PathVariable String name, @RequestParam int maxRows, @RequestParam int startRow) {
-        return geoNamesService.find(name, maxRows, startRow);
+    @GetMapping
+    public List<GeoNameDto> find(@RequestParam String name) {
+        return geoNamesService.find(name);
     }
 
 }

@@ -9,7 +9,6 @@ import lombok.Setter;
 @Setter
 public class GeoName {
     private String adminCode1;
-    private double lng;
     private int geonameId;
     private String toponymName;
     private String fcl;
@@ -21,6 +20,7 @@ public class GeoName {
     private String fclName;
     private String fcodeName;
     private String adminName1;
+    private double lng;
     private double lat;
     private String fcode;
 }
