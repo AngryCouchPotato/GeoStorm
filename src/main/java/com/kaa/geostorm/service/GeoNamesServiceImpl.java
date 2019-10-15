@@ -4,6 +4,7 @@ import com.kaa.geostorm.domain.GeoName;
 import com.kaa.geostorm.domain.GeoNames;
 import com.kaa.geostorm.dto.GeoNameDto;
 import com.kaa.geostorm.dto.mapper.Mapper;
+import com.kaa.geostorm.exception.CanNotGetDataException;
 import com.kaa.geostorm.properties.GeoNamesProperties;
 import lombok.AllArgsConstructor;
 import org.slf4j.Logger;
@@ -12,6 +13,7 @@ import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -32,20 +34,27 @@ public class GeoNamesServiceImpl implements GeoNamesService {
 
     @Override
     public List<GeoNameDto> find(String name) {
-        List<GeoNameDto> geonames = mapper.map(
-                restTemplate.exchange(//todo add catch clause
-                        buildUri(name),
-                        HttpMethod.GET,
-                        null,
-                        new ParameterizedTypeReference<GeoNames>() {
-                        })
-                        .getBody().getGeonames()
-        );
+        List<GeoNameDto> geonames;
+        try {
+            geonames = mapper.map(exchange(name));
+        } catch (RestClientException rce) {
+            throw new CanNotGetDataException("Can not get data from remote service.", rce);
+        }
         logger.debug(String.format("For name = %s were founded %d geonames", name, geonames.size()));
         return geonames;
     }
 
-    private URI buildUri(String name) {
+    List<GeoName> exchange(String name) {
+        return restTemplate.exchange(
+                buildUri(name),
+                HttpMethod.GET,
+                null,
+                new ParameterizedTypeReference<GeoNames>() {
+                })
+                .getBody().getGeonames();
+    }
+
+    URI buildUri(String name) {
         UriComponentsBuilder uriComponentBuilder = UriComponentsBuilder
                 .fromUriString(geoNamesProperties.getSearchUrl());
         if (!StringUtils.isEmpty(name)) {
